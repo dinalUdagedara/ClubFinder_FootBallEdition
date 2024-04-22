@@ -12,6 +12,16 @@
         android:theme="@style/Theme.ClubFinder_FootBallEdition"
         tools:targetApi="31">
         <activity
+            android:name=".SearchForClubs"
+            android:exported="false"
+            android:label="@string/title_activity_search_for_clubs"
+            android:theme="@style/Theme.ClubFinder_FootBallEdition" />
+        <activity
+            android:name=".SearchingClubsByLeague"
+            android:exported="false"
+            android:label="@string/title_activity_searching_clubs_by_league"
+            android:theme="@style/Theme.ClubFinder_FootBallEdition" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
