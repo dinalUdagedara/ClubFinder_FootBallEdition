@@ -1,5 +1,6 @@
 package com.example.clubfinder_footballedition
 
+
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -29,6 +30,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 
 class SearchingClubsByLeague : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,7 +93,7 @@ fun Content (){
 
 @Composable
 fun GUI(context: Context) {
-    var bookInfoDisplay by remember { mutableStateOf(" ") }
+    var teamInfoDisplay by remember { mutableStateOf(" ") }
 // the book title keyword to search for
     var keyword by remember { mutableStateOf("") }
 // Creates a CoroutineScope bound to the GUI composable lifecycle
@@ -104,10 +106,30 @@ fun GUI(context: Context) {
             Column() {
                 Button(onClick = {
                     scope.launch {
-                        bookInfoDisplay = fetchBooks(keyword)
+                        val teams = fetchLeagues(keyword)
+                        teamInfoDisplay = teams.joinToString("\n\n") { team ->
+                            buildString {
+                                append("Team ID: ${team.idTeam}\n")
+                                append("Team Name: ${team.teamName}\n")
+                                append("strTeamShort: ${team.strTeamShort}\n")
+                                append("strAlternate: ${team.strAlternate}\n")
+                                append("intFormedYear: ${team.intFormedYear}\n")
+                                append("strLeague: ${team.strLeague}\n")
+                                append("idLeague: ${team.idLeague}\n")
+                                append("strStadium: ${team.strStadium}\n")
+                                append("strKeywords: ${team.strKeywords}\n")
+                                append("strStadiumThumb: ${team.strStadiumThumb}\n")
+                                append("strStadiumLocation: ${team.strStadiumLocation}\n")
+                                append("intStadiumCapacity: ${team.intStadiumCapacity}\n")
+                                append("strWebsite: ${team.strWebsite}\n")
+                                append("strTeamJersey: ${team.strTeamJersey}\n")
+                                append("strTeamLogo: ${team.strTeamLogo}\n")
+
+                            }
+                        }
                     }
                 }) {
-                    Text("Fetch Books")
+                    Text("Fetch Teams")
                 }
                 Button(onClick = {
                     addSeacrhedLeaguesToDB(context)
@@ -123,65 +145,101 @@ fun GUI(context: Context) {
         }
         Text(
             modifier = Modifier.verticalScroll(rememberScrollState()),
-            text = bookInfoDisplay
+            text = teamInfoDisplay
         )
 
 
     }
 }
+//
+//suspend fun fetchBooks(keyword: String): String {
+////val url_string = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=25"
+//    val url_string = "https://www.googleapis.com/books/v1/volumes?q=" + keyword + "&maxResults=25"
+//    val url = URL(url_string)
+//    val con: HttpURLConnection = url.openConnection() as HttpURLConnection
+//// collecting all the JSON string
+//    var stb = StringBuilder()
+//// run the code of the launched coroutine in a new thread
+//    withContext(Dispatchers.IO) {
+//        var bf = BufferedReader(InputStreamReader(con.inputStream))
+//        var line: String? = bf.readLine()
+//        while (line != null) { // keep reading until no more lines of text
+//            stb.append(line + "\n")
+//            line = bf.readLine()
+//        }
+//    }
+//    val allBooks = parseJSON(stb)
+//    return allBooks
+//}
+//
 
-suspend fun fetchBooks(keyword: String): String {
-//val url_string = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=25"
-    val url_string = "https://www.googleapis.com/books/v1/volumes?q=" + keyword + "&maxResults=25"
+data class Team(
+    val idTeam: String,
+    val teamName: String,
+    val strTeamShort: String,
+    val strAlternate: String,
+    val intFormedYear: String,
+    val strLeague: String,
+    val idLeague: String,
+    val strStadium: String,
+    val strKeywords: String,
+    val strStadiumThumb: String,
+    val strStadiumLocation: String,
+    val intStadiumCapacity: String,
+    val strWebsite: String,
+    val strTeamJersey: String,
+    val strTeamLogo: String
+)
+
+suspend fun fetchLeagues(keyword : String): List<Team> {
+    val encodedKeyword = URLEncoder.encode(keyword, "UTF-8")
+//    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=$encodedKeyword"
+
+    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=Eliteserien"
     val url = URL(url_string)
     val con: HttpURLConnection = url.openConnection() as HttpURLConnection
-// collecting all the JSON string
-    var stb = StringBuilder()
-// run the code of the launched coroutine in a new thread
+
+    val teamsList = mutableListOf<Team>()
+
     withContext(Dispatchers.IO) {
-        var bf = BufferedReader(InputStreamReader(con.inputStream))
+        val bf = BufferedReader(InputStreamReader(con.inputStream))
+        val stb = StringBuilder()
         var line: String? = bf.readLine()
-        while (line != null) { // keep reading until no more lines of text
+        while (line != null) {
             stb.append(line + "\n")
             line = bf.readLine()
         }
-    }
-    val allBooks = parseJSON(stb)
-    return allBooks
-}
 
+        val json = JSONObject(stb.toString())
+        val jsonArray = json.getJSONArray("teams")
 
-
-
-
-
-
-fun parseJSON(stb: StringBuilder): String {
-// this contains the full JSON returned by the Web Service
-    val json = JSONObject(stb.toString())
-// Information about all the books extracted by this function
-    var allBooks = StringBuilder()
-    var jsonArray: JSONArray = json.getJSONArray("items")
-// extract all the books from the JSON array
-    for (i in 0..jsonArray.length() - 1) {
-        val book: JSONObject = jsonArray[i] as JSONObject // this is a json object
-// extract the title
-        val volInfo = book["volumeInfo"] as JSONObject
-        val title = volInfo["title"] as String
-        allBooks.append("${i + 1}) \"$title\" ")
-// extract all the authors
-        try { // in case there is no author in the info
-            val authors = volInfo["authors"] as JSONArray
-            allBooks.append("authors: ")
-            for (i in 0..authors.length() - 1)
-                allBooks.append(authors[i] as String + ", ")
-        } catch (jen: JSONException) {
-// missing author in the information received
+        for (i in 0 until jsonArray.length()) {
+            val leagueObject = jsonArray.getJSONObject(i)
+            val team = Team(
+                idTeam = leagueObject.getString("idTeam"),
+                teamName = leagueObject.getString("strTeam"),
+                strTeamShort = leagueObject.getString("strTeamShort"),
+                strAlternate = leagueObject.getString("strAlternate"),
+                intFormedYear = leagueObject.getString("intFormedYear"),
+                strLeague = leagueObject.getString("strLeague"),
+                idLeague = leagueObject.getString("idLeague"),
+                strStadium = leagueObject.getString("strStadium"),
+                strKeywords = leagueObject.getString("strKeywords"),
+                strStadiumThumb = leagueObject.getString("strStadiumThumb"),
+                strStadiumLocation = leagueObject.getString("strStadiumLocation"),
+                intStadiumCapacity = leagueObject.getString("strLeague"),
+                strWebsite = leagueObject.getString("strWebsite"),
+                strTeamJersey = leagueObject.getString("strTeamJersey"),
+                strTeamLogo = leagueObject.getString("strTeamLogo")
+            )
+            teamsList.add(team)
         }
-        allBooks.append("\n\n")
     }
-    return allBooks.toString()
+
+    return teamsList
 }
+
+
 
 
 fun addSeacrhedLeaguesToDB(context: Context){

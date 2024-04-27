@@ -1,5 +1,6 @@
 package com.example.clubfinder_footballedition
 
+
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
