@@ -17,9 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.room.Room
 import com.example.clubfinder_footballedition.ui.theme.ClubFinder_FootBallEditionTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +41,20 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainButtons(context1: Context,context2: Context){
+    println("0: " + Thread.currentThread())
+    runBlocking {
+        println("1: " + Thread.currentThread())
+        launch {
+            println("2: " + Thread.currentThread())
+// run the code of the coroutine in a new thread
+            withContext(Dispatchers.IO) {
+                println("3: " + Thread.currentThread())
+            }
+            println("4: " + Thread.currentThread())
+        }
+        println("5: " + Thread.currentThread())
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFF77B0AA)
@@ -55,8 +67,8 @@ fun MainButtons(context1: Context,context2: Context){
                 painter = painterResource(id = R.drawable.coverimage5),
                 contentDescription = "Cover Image",
                 modifier = Modifier
-                    .fillMaxWidth()  // Make the image fill the entire width of the parent
-                    .height(600.dp)  // Set the height of the image to a fixed value
+                    .fillMaxWidth()
+                    .height(600.dp)
             )
 
             Column(
