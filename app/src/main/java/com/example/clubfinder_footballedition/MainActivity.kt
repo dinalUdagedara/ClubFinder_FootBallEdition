@@ -42,19 +42,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainButtons(context1: Context,context2: Context){
-    println("0: " + Thread.currentThread())
-    runBlocking {
-        println("1: " + Thread.currentThread())
-        launch {
-            println("2: " + Thread.currentThread())
-// run the code of the coroutine in a new thread
-            withContext(Dispatchers.IO) {
-                println("3: " + Thread.currentThread())
-            }
-            println("4: " + Thread.currentThread())
-        }
-        println("5: " + Thread.currentThread())
-    }
+
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -110,7 +98,10 @@ fun MainButtons(context1: Context,context2: Context){
                 }
                 Spacer(modifier = Modifier.height(4.dp)) // Add space between buttons
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        val navigate2 = Intent(context2,SearchForClubs::class.java)
+                        context2.startActivity(navigate2)
+                              },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp), // Set a fixed height for all buttons
