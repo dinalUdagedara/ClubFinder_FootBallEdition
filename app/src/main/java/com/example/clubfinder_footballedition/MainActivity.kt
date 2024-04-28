@@ -158,7 +158,7 @@ fun addLeaguesToDB(context:Context){
     GlobalScope.launch (Dispatchers.IO){
         val db = Room.databaseBuilder(
             context.applicationContext,
-            LeagueDB::class.java,"Leagues"
+            LeagueDB::class.java,"Leagues2"
         ).build()
         val leaguesDAO = db.leaguesDAO()
 

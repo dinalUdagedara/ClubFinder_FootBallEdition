@@ -3,7 +3,7 @@ package com.example.clubfinder_footballedition
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity (tableName = "League Table")
 data class Leagues(
 
     @PrimaryKey val idLeague: String,
