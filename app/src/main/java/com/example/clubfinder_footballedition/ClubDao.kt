@@ -19,6 +19,9 @@ interface ClubDao {
      @Query("SELECT * FROM clubTable")
      suspend fun searchClubsTesting(): List<ClubEntity>
 
+    @Query("SELECT * FROM clubTable WHERE lower(teamName) LIKE '%' || lower(:searchQuery) || '%' OR lower(strLeague) LIKE '%' || lower(:searchQuery) || '%'")
+    suspend fun searchClubs(searchQuery: String): List<ClubEntity>
+
 
     companion object
 

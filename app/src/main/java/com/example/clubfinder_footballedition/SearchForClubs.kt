@@ -54,20 +54,27 @@ fun GUI_Club_Search(context:Context){
 
     fun showClubInfo(searchTerm:String){
         GlobalScope.launch  (Dispatchers.IO){
-
-            val clubs  = ClubDao.searchClubsTesting()
-            withContext(Dispatchers.Main){
-                allClubs = clubs
+            val clubNames = withContext(Dispatchers.IO){
+                ClubDao.searchClubs(searchTerm)
             }
+            allClubs = clubNames
+//            val clubs  = ClubDao.searchClubsTesting()
+//            withContext(Dispatchers.Main){
+//                allClubs = clubs
+//            }
         }
     }
-    LaunchedEffect(Unit) {
-        val clubs = withContext(Dispatchers.IO) {
-            ClubDao.searchClubsTesting()
-        }
-        allClubs = clubs
+//    LaunchedEffect(Unit) {
+//        val clubs = withContext(Dispatchers.IO) {
+//            ClubDao.searchClubsTesting()
+//        }
+//        allClubs = clubs
+//
+//    }
 
-    }
+
+
+
 
 
 
@@ -105,6 +112,7 @@ fun GUI_Club_Search(context:Context){
 
     }
 }
+
 
 
 
