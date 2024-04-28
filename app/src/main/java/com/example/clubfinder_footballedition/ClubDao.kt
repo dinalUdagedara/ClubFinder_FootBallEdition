@@ -4,14 +4,16 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.clubfinder_footballedition.ClubEntity
+import com.example.clubfinder_footballedition.Leagues
 
 @Dao
-interface LeagueDAO {
-//    @Query ("select * from leagues")
-//        fun getAll():List<Leagues>
+interface ClubDao {
+
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(vararg leagues: Leagues)  //Duplicates are Allowed
+     fun insertAll( vararg clubs: ClubEntity)
+
 
 
 }
