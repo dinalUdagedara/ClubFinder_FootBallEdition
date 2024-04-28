@@ -101,55 +101,14 @@ fun GUI(context: Context) {
 
             TextField(value = keyword, onValueChange = { keyword = it })
 
-
         }
         Text(
             modifier = Modifier.verticalScroll(rememberScrollState()),
             text = teamInfoDisplay
         )
-
-
     }
 }
-//
-//suspend fun fetchBooks(keyword: String): String {
-////val url_string = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=25"
-//    val url_string = "https://www.googleapis.com/books/v1/volumes?q=" + keyword + "&maxResults=25"
-//    val url = URL(url_string)
-//    val con: HttpURLConnection = url.openConnection() as HttpURLConnection
-//// collecting all the JSON string
-//    var stb = StringBuilder()
-//// run the code of the launched coroutine in a new thread
-//    withContext(Dispatchers.IO) {
-//        var bf = BufferedReader(InputStreamReader(con.inputStream))
-//        var line: String? = bf.readLine()
-//        while (line != null) { // keep reading until no more lines of text
-//            stb.append(line + "\n")
-//            line = bf.readLine()
-//        }
-//    }
-//    val allBooks = parseJSON(stb)
-//    return allBooks
-//}
-//
 
-data class Team(
-    val idTeam: String,
-    val teamName: String,
-    val strTeamShort: String,
-    val strAlternate: String,
-    val intFormedYear: String,
-    val strLeague: String,
-    val idLeague: String,
-    val strStadium: String,
-    val strKeywords: String,
-    val strStadiumThumb: String,
-    val strStadiumLocation: String,
-    val intStadiumCapacity: String,
-    val strWebsite: String,
-    val strTeamJersey: String,
-    val strTeamLogo: String
-)
 val teamsList = mutableListOf<ClubEntity>()
 suspend fun fetchLeagues(keyword : String): List<ClubEntity> {
     val encodedKeyword = URLEncoder.encode(keyword, "UTF-8")
@@ -158,7 +117,6 @@ suspend fun fetchLeagues(keyword : String): List<ClubEntity> {
     val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=Eliteserien"
     val url = URL(url_string)
     val con: HttpURLConnection = url.openConnection() as HttpURLConnection
-
 
 
     withContext(Dispatchers.IO) {
@@ -200,8 +158,6 @@ suspend fun fetchLeagues(keyword : String): List<ClubEntity> {
 }
 
 
-
-
 fun addSeacrhedLeaguesToDB(context: Context){
 
 
@@ -227,7 +183,7 @@ fun addSeacrhedLeaguesToDB(context: Context){
     GlobalScope.launch (Dispatchers.IO){
         val db = Room.databaseBuilder(
             context.applicationContext,
-            LeagueDB::class.java,"Leagues2"
+            LeagueDB::class.java,"Leagues3"
         ).build()
         val ClubDao = db.clubDao()
 
@@ -239,61 +195,4 @@ fun addSeacrhedLeaguesToDB(context: Context){
 
     }
 
-
-//    val league1 = Leagues(idLeague = "4328", strLeague = "English Premier League", strSport = "Soccer", strLeagueAlternate = "Premier League, EPL")
-//    val league2 = Leagues(idLeague = "4329", strLeague = "English League Championship", strSport = "Soccer", strLeagueAlternate = "Championship")
-//    val league3 = Leagues(idLeague = "4330", strLeague = "Scottish Premier League", strSport = "Soccer", strLeagueAlternate = "Scottish Premiership, SPFL")
-//    val league4 = Leagues(idLeague = "4331", strLeague = "German Bundesliga", strSport = "Soccer", strLeagueAlternate = "Bundesliga, FuÃŸball-Bundesliga")
-//    val league5 = Leagues(idLeague = "4332", strLeague = "Italian Serie A", strSport = "Soccer", strLeagueAlternate = "Serie A")
-//    val league6 = Leagues(idLeague = "4334", strLeague = "French Ligue 1", strSport = "Soccer", strLeagueAlternate = "Ligue 1 Conforama")
-//    val league7 = Leagues(idLeague = "4335", strLeague = "Spanish La Liga", strSport = "Soccer", strLeagueAlternate = "LaLiga Santander, La Liga")
-//    val league8 = Leagues(idLeague = "4336", strLeague = "Greek Superleague Greece", strSport = "Soccer", strLeagueAlternate = "")
-//    val league9 = Leagues(idLeague = "4337", strLeague = "Dutch Eredivisie", strSport = "Soccer", strLeagueAlternate = "Eredivisie")
-//    val league10 = Leagues(idLeague = "4338", strLeague = "Belgian First Division A", strSport = "Soccer", strLeagueAlternate = "Jupiler Pro League")
-//    val league11 = Leagues(idLeague = "4339", strLeague = "Turkish Super Lig", strSport = "Soccer", strLeagueAlternate = "Super Lig")
-//    val league12 = Leagues(idLeague = "4340", strLeague = "Danish Superliga", strSport = "Soccer", strLeagueAlternate = "")
-//    val league13 = Leagues(idLeague = "4344", strLeague = "Portuguese Primeira Liga", strSport = "Soccer", strLeagueAlternate = "Liga NOS")
-//    val league14 = Leagues(idLeague = "4346", strLeague = "American Major League Soccer", strSport = "Soccer", strLeagueAlternate = "MLS, Major League Soccer")
-//    val league15 = Leagues(idLeague = "4347", strLeague = "Swedish Allsvenskan", strSport = "Soccer", strLeagueAlternate = "Fotbollsallsvenskan")
-//    val league16 = Leagues(idLeague = "4350", strLeague = "Mexican Primera League", strSport = "Soccer", strLeagueAlternate = "Liga MX")
-//    val league17 = Leagues(idLeague = "4351", strLeague = "Brazilian Serie A", strSport = "Soccer", strLeagueAlternate = "")
-//    val league18 = Leagues(idLeague = "4354", strLeague = "Ukrainian Premier League", strSport = "Soccer", strLeagueAlternate = "")
-//    val league19 = Leagues(idLeague = "4355", strLeague = "Russian Football Premier League", strSport = "Soccer", strLeagueAlternate = "Ð§ÐµÐ¼Ð¿Ð¸Ð¾Ð½Ð°Ñ‚ Ð Ð¾ÑÑÐ¸Ð¸ Ð¿Ð¾ Ñ„ÑƒÑ‚Ð±Ð¾Ð»Ñƒ")
-//    val league20 = Leagues(idLeague = "4356", strLeague = "Australian A-League", strSport = "Soccer", strLeagueAlternate = "A-League")
-//    val league21 = Leagues(idLeague = "4358", strLeague = "Norwegian Eliteserien", strSport = "Soccer", strLeagueAlternate = "Eliteserien")
-//    val league22 = Leagues(idLeague = "4359", strLeague = "Chinese Super League", strSport = "Soccer", strLeagueAlternate = "")
-//
-//    GlobalScope.launch (Dispatchers.IO){
-//        val db = Room.databaseBuilder(
-//            context.applicationContext,
-//            LeagueDB::class.java,"Leagues"
-//        ).build()
-//        val leaguesDAO = db.leaguesDAO()
-//
-//
-//
-//        leaguesDAO.insertAll(league1)
-//        leaguesDAO.insertAll(league2)
-//        leaguesDAO.insertAll(league3)
-//        leaguesDAO.insertAll(league4)
-//        leaguesDAO.insertAll(league5)
-//        leaguesDAO.insertAll(league6)
-//        leaguesDAO.insertAll(league7)
-//        leaguesDAO.insertAll(league8)
-//        leaguesDAO.insertAll(league9)
-//        leaguesDAO.insertAll(league10)
-//        leaguesDAO.insertAll(league11)
-//        leaguesDAO.insertAll(league12)
-//        leaguesDAO.insertAll(league13)
-//        leaguesDAO.insertAll(league14)
-//        leaguesDAO.insertAll(league15)
-//        leaguesDAO.insertAll(league16)
-//        leaguesDAO.insertAll(league17)
-//        leaguesDAO.insertAll(league18)
-//        leaguesDAO.insertAll(league19)
-//        leaguesDAO.insertAll(league20)
-//        leaguesDAO.insertAll(league21)
-//        leaguesDAO.insertAll(league22)
-//
-//    }
 }

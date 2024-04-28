@@ -11,4 +11,5 @@ import androidx.room.RoomDatabase
 abstract class LeagueDB : RoomDatabase() {
     abstract fun leaguesDAO(): LeagueDAO
     abstract fun clubDao(): ClubDao
+
 }
