@@ -2,4 +2,5 @@
     <string name="app_name">ClubFinder_FootBallEdition</string>
     <string name="title_activity_searching_clubs_by_league">SearchingClubsByLeague</string>
     <string name="title_activity_search_for_clubs">SearchForClubs</string>
+    <string name="title_activity_search_for_club_web_service">SearchForClubWebService</string>
 </resources>

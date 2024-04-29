@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -50,7 +52,9 @@ fun MainButtons(context1: Context,context2: Context){
     )
     {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             Image(
                 painter = painterResource(id = R.drawable.coverimage5),
@@ -62,6 +66,7 @@ fun MainButtons(context1: Context,context2: Context){
 
             Column(
                 modifier = Modifier
+//                    .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
                     .padding(24.dp),
                 verticalArrangement = Arrangement.Center,
@@ -109,6 +114,20 @@ fun MainButtons(context1: Context,context2: Context){
                         contentColor = Color.White)
                 ) {
                     Text(text = "Search for Clubs")
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Button(
+                    onClick = {
+                        val navigate = Intent(context2,SearchForClubWebService::class.java)
+                        context2.startActivity(navigate)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp), // Set a fixed height for all buttons
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
+                        contentColor = Color.White)
+                ) {
+                    Text(text = "Search for Clubs in Web Service")
                 }
             }
 

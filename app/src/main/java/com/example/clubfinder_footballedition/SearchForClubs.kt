@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,7 +13,9 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.room.Room
+import coil.compose.rememberImagePainter
 import com.example.clubfinder_footballedition.ui.theme.ClubFinder_FootBallEditionTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -39,6 +42,22 @@ class SearchForClubs : ComponentActivity() {
 
 @Composable
 fun GUI_Club_Search(context:Context){
+
+
+    @Composable
+    fun ClubLogo(logoUrl: String) {
+        val painter = rememberImagePainter(
+            data = logoUrl,
+            builder = {
+                // You can configure image loading options here
+            }
+        )
+        Image(
+            painter = painter,
+            contentDescription = null, // Provide appropriate content description
+            modifier = Modifier.size(50.dp) // Adjust size as needed
+        )
+    }
 
     val db = Room.databaseBuilder(
         context.applicationContext,
@@ -80,17 +99,23 @@ fun GUI_Club_Search(context:Context){
 
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+        ,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row {
             Column(
+                modifier = Modifier
+                    .fillMaxSize(),
 
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
                 TextField(value = searchTerm, onValueChange = { searchTerm = it })
+
 
                 Button(onClick = {
 
@@ -106,12 +131,20 @@ fun GUI_Club_Search(context:Context){
 
         }
         allClubs.forEach { club ->
-            Text(text = "Name: ${club.teamName} ${club.idTeam}")
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ClubLogo(club.strTeamLogo) // Display club logo
+
+                Spacer(modifier = Modifier.width(8.dp)) // Add spacing between logo and name
+                Text(text = "Name: ${club.teamName} ${club.idTeam}")
+            }
         }
 
 
     }
 }
+
 
 
 
