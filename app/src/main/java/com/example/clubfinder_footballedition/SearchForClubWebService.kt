@@ -12,7 +12,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.clubfinder_footballedition.ui.theme.ClubFinder_FootBallEditionTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,7 +21,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLEncoder
 
 class SearchForClubWebService : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +43,9 @@ class SearchForClubWebService : ComponentActivity() {
 @Composable
 fun SearchForClubWebServiceGUI(){
 
-    var clubInfoDisplay by remember { mutableStateOf(" ") }
+    var leagueInfo by remember { mutableStateOf(" ") }
+    var teamsInfo by remember { mutableStateOf("") }
+
     var searchTerm by remember { mutableStateOf("") }
     var keyword by remember { mutableStateOf("") }
 
@@ -62,44 +62,127 @@ fun SearchForClubWebServiceGUI(){
         Button(onClick = {
             scope.launch {
 
-                val retrievedClubs = fetchClubs(keyword)
-                clubInfoDisplay = retrievedClubs.joinToString("\n\n") { club ->
+                val allLeagues = fetchAllLeagues(keyword)
+                leagueInfo = allLeagues.joinToString("\n\n") { league ->
                     buildString {
-                        append("Team ID: ${club.idTeam}\n")
-                        append("Team Name: ${club.teamName}\n")
-                        append("strTeamShort: ${club.strTeamShort}\n")
-                        append("strAlternate: ${club.strAlternate}\n")
-                        append("intFormedYear: ${club.intFormedYear}\n")
-                        append("strLeague: ${club.strLeague}\n")
-                        append("idLeague: ${club.idLeague}\n")
-                        append("strStadium: ${club.strStadium}\n")
-                        append("strKeywords: ${club.strKeywords}\n")
-                        append("strStadiumThumb: ${club.strStadiumThumb}\n")
-                        append("strStadiumLocation: ${club.strStadiumLocation}\n")
-                        append("intStadiumCapacity: ${club.intStadiumCapacity}\n")
-                        append("strWebsite: ${club.strWebsite}\n")
-                        append("strTeamJersey: ${club.strTeamJersey}\n")
-                        append("strTeamLogo: ${club.strTeamLogo}\n")
+                        append("idLeague: ${league.idLeague}\n")
+                        append("strLeague: ${league.strLeague}\n")
+                        append("strSport: ${league.strSport}\n")
+                        append("strLeagueAlternate: ${league.strLeagueAlternate}\n")
+
 
                     }
                 }
+//                leagueList.forEach{league ->
+//
+//                    val allTeams = fetchAllClubs(league.strLeague)
+//                }
+
             }
         }) {
-            Text("Look Up")
+            Text("Fetch Leagues")
         }
+
+        Button(onClick = {
+            scope.launch {
+
+                val allTeams = fetchAllClubs(keyword)
+                teamsInfo = allTeams.joinToString("\n\n") { team ->
+                    buildString {
+                        append("Team ID: ${team.idTeam}\n")
+                        append("Team Name: ${team.teamName}\n")
+                        append("strTeamShort: ${team.strTeamShort}\n")
+                        append("strAlternate: ${team.strAlternate}\n")
+                        append("intFormedYear: ${team.intFormedYear}\n")
+                        append("strLeague: ${team.strLeague}\n")
+                        append("idLeague: ${team.idLeague}\n")
+                        append("strStadium: ${team.strStadium}\n")
+                        append("strKeywords: ${team.strKeywords}\n")
+                        append("strStadiumThumb: ${team.strStadiumThumb}\n")
+                        append("strStadiumLocation: ${team.strStadiumLocation}\n")
+                        append("intStadiumCapacity: ${team.intStadiumCapacity}\n")
+                        append("strWebsite: ${team.strWebsite}\n")
+                        append("strTeamJersey: ${team.strTeamJersey}\n")
+                        append("strTeamLogo: ${team.strTeamLogo}\n")
+                    }
+                }
+
+            }
+
+        }) {
+            Text("Fetch Teams")
+        }
+
+
+
 //        Text(text = teamsList2)
         Text(
             modifier = Modifier.verticalScroll(rememberScrollState()),
-            text = clubInfoDisplay
+            text = teamsInfo
         )
+        Text(
+            modifier = Modifier.verticalScroll(rememberScrollState()),
+            text = leagueInfo
+        )
+
+
     }
 }
 
 
-val teamsList2 = mutableListOf<ClubEntity>()
-suspend fun fetchClubs(keyword : String): List<ClubEntity> {
-    val encodedKeyword = URLEncoder.encode(keyword, "UTF-8")
-    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=$encodedKeyword"
+val leagueList = mutableListOf<Leagues>()
+
+suspend fun fetchAllLeagues(keyword : String): List<Leagues> {
+
+//    val encodedKeyword2 = URLEncoder.encode(keyword, "UTF-8")
+//    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=$encodedKeyword2"
+
+    val url_string =  "https://www.thesportsdb.com/api/v1/json/3/all_leagues.php"
+//    val url_string =  "https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=$keyword"
+
+
+//    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=Eliteserien"
+    val url = URL(url_string)
+    val con: HttpURLConnection = url.openConnection() as HttpURLConnection
+
+
+    withContext(Dispatchers.IO) {
+        val bf = BufferedReader(InputStreamReader(con.inputStream))
+        val stb = StringBuilder()
+        var line: String? = bf.readLine()
+        while (line != null) {
+            stb.append(line + "\n")
+            line = bf.readLine()
+        }
+
+        val json = JSONObject(stb.toString())
+        val jsonArray = json.getJSONArray("leagues")
+
+        for (i in 0 until jsonArray.length()) {
+            val leagueObject = jsonArray.getJSONObject(i)
+            val league = Leagues(
+                idLeague = leagueObject.getString("idLeague"),
+                strLeague = leagueObject.getString("strLeague"),
+                strSport = leagueObject.getString("strSport"),
+                strLeagueAlternate = leagueObject.getString("strLeagueAlternate")
+
+            )
+            leagueList.add(league)
+        }
+    }
+
+    return leagueList
+}
+
+suspend fun fetchAllClubs(keyword : String): List<ClubEntity> {
+    val teamsList = mutableListOf<ClubEntity>()
+
+//    val encodedKeyword2 = URLEncoder.encode(keyword, "UTF-8")
+//    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=$encodedKeyword2"
+
+    val url_string =  "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=English%20Premier%20League"
+//    val url_string =  "https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=$keyword"
+
 
 //    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=Eliteserien"
     val url = URL(url_string)
@@ -136,10 +219,13 @@ suspend fun fetchClubs(keyword : String): List<ClubEntity> {
                 strWebsite = leagueObject.getString("strWebsite"),
                 strTeamJersey = leagueObject.getString("strTeamJersey"),
                 strTeamLogo = leagueObject.getString("strTeamLogo")
+
+
             )
-            teamsList2.add(team)
+            teamsList.add(team)
         }
     }
 
-    return teamsList2
+    return teamsList
 }
+
