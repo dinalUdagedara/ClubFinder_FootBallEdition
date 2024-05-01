@@ -64,7 +64,8 @@ fun SearchForClubWebServiceGUI(){
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+
     ) {
         TextField(value = searchTerm, onValueChange = { searchTerm = it } )
 
@@ -139,10 +140,10 @@ fun SearchForClubWebServiceGUI(){
 
 
 
-        Text(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            text = teamsInfo
-        )
+//        Text(
+//            modifier = Modifier.verticalScroll(rememberScrollState()),
+//            text = teamsInfo
+//        )
 
         jerseysList.forEach { (teamName, season, jerseyURL) ->
             Log.d("list","$teamName,$season,$jerseyURL")
