@@ -4,19 +4,21 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import com.example.clubfinder_footballedition.ui.theme.ClubFinder_FootBallEditionTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -44,6 +46,7 @@ class SearchForClubWebService : ComponentActivity() {
 
 @Composable
 fun SearchForClubWebServiceGUI(){
+    var FetchedAllTeams = mutableMapOf<String,String>()
 
     var leagueInfo by remember { mutableStateOf(" ") }
     var teamsInfo by remember { mutableStateOf("") }
@@ -64,19 +67,6 @@ fun SearchForClubWebServiceGUI(){
         verticalArrangement = Arrangement.Center
     ) {
         TextField(value = searchTerm, onValueChange = { searchTerm = it } )
-        Button(onClick = {
-            scope.launch {
-
-
-//                leagueList.forEach{league ->
-//
-//                    val allTeams = fetchAllClubs(league.strLeague)
-//                }
-
-            }
-        }) {
-            Text("Fetch Leagues")
-        }
 
         Button(onClick = {
 
@@ -101,6 +91,10 @@ fun SearchForClubWebServiceGUI(){
                 leagueList.forEach{league ->
 
                      allTeams = fetchAllClubs(league.strLeague,searchTerm)
+                    if (allTeams != null){
+                        FetchedAllTeams.putAll(allTeams)
+                    }
+
 //                    val leagueTeamsInfo = allTeams.joinToString("\n\n") { team ->
 //                        buildString {
 //                            append("Team ID: ${team.idTeam}\n")
@@ -114,24 +108,25 @@ fun SearchForClubWebServiceGUI(){
                         teamsInfoStringBuilder.append("Team ID: $key\n")
                         teamsInfoStringBuilder.append("Team Name: $value\n\n")
 
+                        Log.d("allTeams InFUn","$allTeams")
+
 
                     }
 
                     val teamsInfoString = teamsInfoStringBuilder.toString()
                     teamsInfo = teamsInfoString
 
-                    Log.d("allTeams in function","$allTeams")
+                    Log.d("allTeams fetched","$FetchedAllTeams")
 
                 }
 
-                allTeams.forEach{(key,value)->
+                FetchedAllTeams.forEach{(key,value)->
+                    Log.d("FetchedAllTEams","$value")
                     jerseyList = lookupJerseys(key,value)
                 }
-                Log.d("allTeams","$allTeams")
+
                 Log.d("Jersey List","$jerseyList")
                 Log.d("teamNamesInList","$teamsInfo")
-
-
 
 
             }
@@ -148,6 +143,19 @@ fun SearchForClubWebServiceGUI(){
             modifier = Modifier.verticalScroll(rememberScrollState()),
             text = teamsInfo
         )
+
+        jerseysList.forEach { (teamName, season, jerseyURL) ->
+            Log.d("list","$teamName,$season,$jerseyURL")
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                JerseyImage(jerseyURL) // Display club logo
+
+                Spacer(modifier = Modifier.width(8.dp)) // Add spacing between logo and name
+                Text(text = "Name: ${teamName} ${season}")
+            }
+        }
+
 //        Text(
 //            modifier = Modifier.verticalScroll(rememberScrollState()),
 //            text = leagueInfo
@@ -259,11 +267,11 @@ suspend fun fetchAllClubs(keyword : String,searchTerm:String): MutableMap<String
 }
 
 
-
+val jerseysList = mutableListOf<Triple<String, String, String>>()
 
 suspend fun lookupJerseys(teamID : String, teamName: String) :MutableList<Triple<String, String, String>> {
 
-    val jerseysList = mutableListOf<Triple<String, String, String>>()
+
 
     val url_string = "https://www.thesportsdb.com/api/v1/json/3/lookupequipment.php?id=$teamID"
 
@@ -287,7 +295,8 @@ suspend fun lookupJerseys(teamID : String, teamName: String) :MutableList<Triple
         }
 
         val json = JSONObject(stb.toString())
-        val jsonArray = json.getJSONArray("equipment")
+        val jsonArray = json.optJSONArray("equipment") ?: JSONArray()
+
 
         for (i in 0 until jsonArray.length()) {
             val jerseyObject = jsonArray.getJSONObject(i)
@@ -297,6 +306,7 @@ suspend fun lookupJerseys(teamID : String, teamName: String) :MutableList<Triple
 
             val teamName = teamName
 
+            Log.d("Jersey Info ","$strEquipment")
             jerseysList.add(Triple(teamName, strSeason, strEquipment))
 
 
@@ -312,3 +322,18 @@ suspend fun lookupJerseys(teamID : String, teamName: String) :MutableList<Triple
 
 }
 
+
+@Composable
+fun JerseyImage(jerseyUrl: String){
+    val painter = rememberImagePainter(
+        data = jerseyUrl,
+        builder = {
+            // You can configure image loading options here
+        }
+    )
+    Image(
+        painter = painter,
+        contentDescription = null, // Provide appropriate content description
+        modifier = Modifier.size(50.dp) // Adjust size as needed
+    )
+}
