@@ -12,6 +12,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.clubfinder_footballedition.ui.theme.ClubFinder_FootBallEditionTheme
@@ -25,8 +26,10 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
-
+val leagueList = mutableListOf<Leagues>()
 class SearchForClubWebService : ComponentActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -42,10 +45,14 @@ class SearchForClubWebService : ComponentActivity() {
             }
         }
     }
+
 }
+
+
 
 @Composable
 fun SearchForClubWebServiceGUI(){
+
     var FetchedAllTeams = mutableMapOf<String,String>()
 
     var leagueInfo by remember { mutableStateOf(" ") }
@@ -61,12 +68,15 @@ fun SearchForClubWebServiceGUI(){
     var jerseyList = mutableListOf<Triple<String, String, String>>()
 
 
-
+Surface(
+    modifier = Modifier.fillMaxSize(),
+    color = Color(0xFF77B0AA)
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
 
-    ) {
+        ) {
         TextField(value = searchTerm, onValueChange = { searchTerm = it } )
 
         Button(onClick = {
@@ -91,7 +101,7 @@ fun SearchForClubWebServiceGUI(){
                 val teamsInfoStringBuilder = StringBuilder()
                 leagueList.forEach{league ->
 
-                     allTeams = fetchAllClubs(league.strLeague,searchTerm)
+                    allTeams = fetchAllClubs(league.strLeague,searchTerm)
                     if (allTeams != null){
                         FetchedAllTeams.putAll(allTeams)
                     }
@@ -140,10 +150,11 @@ fun SearchForClubWebServiceGUI(){
 
 
 
-//        Text(
-//            modifier = Modifier.verticalScroll(rememberScrollState()),
-//            text = teamsInfo
-//        )
+        Text(
+            modifier = Modifier.verticalScroll(rememberScrollState()),
+            text = teamsInfo
+        )
+        
 
         jerseysList.forEach { (teamName, season, jerseyURL) ->
             Log.d("list","$teamName,$season,$jerseyURL")
@@ -157,6 +168,8 @@ fun SearchForClubWebServiceGUI(){
             }
         }
 
+        JerseyImage(jerseyUrl ="https://www.thesportsdb.com/images/media/team/jersey/igciz51598887447.png" )
+
 //        Text(
 //            modifier = Modifier.verticalScroll(rememberScrollState()),
 //            text = leagueInfo
@@ -166,8 +179,10 @@ fun SearchForClubWebServiceGUI(){
     }
 }
 
+}
 
-val leagueList = mutableListOf<Leagues>()
+
+
 
 suspend fun fetchAllLeagues(keyword : String): List<Leagues> {
 
@@ -326,6 +341,8 @@ suspend fun lookupJerseys(teamID : String, teamName: String) :MutableList<Triple
 
 @Composable
 fun JerseyImage(jerseyUrl: String){
+    Log.d("JerseyImage","$jerseyUrl")
+
     val painter = rememberImagePainter(
         data = jerseyUrl,
         builder = {
