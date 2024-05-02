@@ -4,6 +4,7 @@ package com.example.clubfinder_footballedition
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -94,7 +95,7 @@ fun MainButtons(context1: Context,context2: Context){
                               },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp), // Set a fixed height for all buttons
+                        .height(48.dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
                         contentColor = Color.White
                         )
@@ -194,6 +195,10 @@ fun addLeaguesToDB(context:Context){
         leaguesDAO.insertAll(league20)
         leaguesDAO.insertAll(league21)
         leaguesDAO.insertAll(league22)
+
+        withContext(Dispatchers.Main) {
+            Toast.makeText(context, "Leagues added to database", Toast.LENGTH_SHORT).show()
+        }
 
     }
 }

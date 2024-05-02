@@ -3,12 +3,13 @@ package com.example.clubfinder_footballedition
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -16,6 +17,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.room.Room
 import com.example.clubfinder_footballedition.ui.theme.ClubFinder_FootBallEditionTheme
 import kotlinx.coroutines.Dispatchers
@@ -54,58 +57,95 @@ class SearchingClubsByLeague : ComponentActivity() {
 @Composable
 fun GUI(context: Context) {
     var teamInfoDisplay by remember { mutableStateOf(" ") }
-// the book title keyword to search for
     var keyword by remember { mutableStateOf("") }
-// Creates a CoroutineScope bound to the GUI composable lifecycle
     val scope = rememberCoroutineScope()
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row {
-            Column() {
-                Button(onClick = {
-                    scope.launch {
-                        val teams = fetchLeagues(keyword)
-                        teamInfoDisplay = teams.joinToString("\n\n") { team ->
-                            buildString {
-                                append("Team ID: ${team.idTeam}\n")
-                                append("Team Name: ${team.teamName}\n")
-                                append("strTeamShort: ${team.strTeamShort}\n")
-                                append("strAlternate: ${team.strAlternate}\n")
-                                append("intFormedYear: ${team.intFormedYear}\n")
-                                append("strLeague: ${team.strLeague}\n")
-                                append("idLeague: ${team.idLeague}\n")
-                                append("strStadium: ${team.strStadium}\n")
-                                append("strKeywords: ${team.strKeywords}\n")
-                                append("strStadiumThumb: ${team.strStadiumThumb}\n")
-                                append("strStadiumLocation: ${team.strStadiumLocation}\n")
-                                append("intStadiumCapacity: ${team.intStadiumCapacity}\n")
-                                append("strWebsite: ${team.strWebsite}\n")
-                                append("strTeamJersey: ${team.strTeamJersey}\n")
-                                append("strTeamLogo: ${team.strTeamLogo}\n")
 
-                            }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(16.dp)) {
+
+        TextField(value = keyword, onValueChange = { keyword = it })
+
+        Spacer(modifier = Modifier.height(25.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .padding(horizontal = 8.dp)
+        ) {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .height(48.dp)
+                ,
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
+                    contentColor = Color.White),
+
+
+                    onClick = {
+                scope.launch {
+                    val teams = fetchLeagues(keyword)
+                    teamInfoDisplay = teams.joinToString("\n\n") { team ->
+                        buildString {
+                            append("Team ID: ${team.idTeam}\n")
+                            append("Team Name: ${team.teamName}\n")
+                            append("strTeamShort: ${team.strTeamShort}\n")
+                            append("strAlternate: ${team.strAlternate}\n")
+                            append("intFormedYear: ${team.intFormedYear}\n")
+                            append("strLeague: ${team.strLeague}\n")
+                            append("idLeague: ${team.idLeague}\n")
+                            append("strStadium: ${team.strStadium}\n")
+                            append("strKeywords: ${team.strKeywords}\n")
+                            append("strStadiumThumb: ${team.strStadiumThumb}\n")
+                            append("strStadiumLocation: ${team.strStadiumLocation}\n")
+                            append("intStadiumCapacity: ${team.intStadiumCapacity}\n")
+                            append("strWebsite: ${team.strWebsite}\n")
+                            append("strTeamJersey: ${team.strTeamJersey}\n")
+                            append("strTeamLogo: ${team.strTeamLogo}\n")
                         }
                     }
-                }) {
-                    Text("Fetch Teams")
                 }
-                Button(onClick = {
-                    addSeacrhedLeaguesToDB(context)
-                }) {
-                    Text(text = " Save clubs to Database")
-
-                }
+            }) {
+                Text("Fetch Teams")
             }
+            Spacer(modifier = Modifier.height(35.dp))
 
-            TextField(value = keyword, onValueChange = { keyword = it })
 
         }
-        Text(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            text = teamInfoDisplay
-        )
+
+        Button(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .height(48.dp),
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
+                contentColor = Color.White),
+
+            onClick = {
+            addSeacrhedLeaguesToDB(context)
+        }) {
+            Text("Save clubs to Database")
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(teamInfoDisplay.lines()) { line ->
+                Card(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                    elevation = 8.dp
+                ) {
+                    Text(
+                        text = teamInfoDisplay,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+        }
     }
 }
 

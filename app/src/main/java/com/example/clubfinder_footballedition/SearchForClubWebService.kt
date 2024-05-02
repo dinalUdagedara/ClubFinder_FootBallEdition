@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.clubfinder_footballedition.ui.theme.ClubFinder_FootBallEditionTheme
 import kotlinx.coroutines.Dispatchers
@@ -53,18 +54,18 @@ class SearchForClubWebService : ComponentActivity() {
 @Composable
 fun SearchForClubWebServiceGUI(){
 
-    var FetchedAllTeams = mutableMapOf<String,String>()
+    val fetchedAllTeams = mutableMapOf<String,String>()
 
     var leagueInfo by remember { mutableStateOf(" ") }
     var teamsInfo by remember { mutableStateOf("") }
 
     var searchTerm by remember { mutableStateOf("") }
-    var keyword by remember { mutableStateOf("") }
+    val keyword by remember { mutableStateOf("") }
 
     // Creates a CoroutineScope bound to the GUI composable lifecycle
     val scope = rememberCoroutineScope()
 
-    var allTeams = mutableMapOf<String,String>()
+    var allTeams: MutableMap<String, String>
     var jerseyList = mutableListOf<Triple<String, String, String>>()
 
 
@@ -103,7 +104,7 @@ Surface(
 
                     allTeams = fetchAllClubs(league.strLeague,searchTerm)
                     if (allTeams != null){
-                        FetchedAllTeams.putAll(allTeams)
+                        fetchedAllTeams.putAll(allTeams)
                     }
 
 //                    val leagueTeamsInfo = allTeams.joinToString("\n\n") { team ->
@@ -127,17 +128,17 @@ Surface(
                     val teamsInfoString = teamsInfoStringBuilder.toString()
                     teamsInfo = teamsInfoString
 
-                    Log.d("allTeams fetched","$FetchedAllTeams")
+                    Log.d("allTeams fetched","$fetchedAllTeams")
 
                 }
 
-                FetchedAllTeams.forEach{(key,value)->
-                    Log.d("FetchedAllTEams","$value")
+                fetchedAllTeams.forEach{ (key,value)->
+                    Log.d("FetchedAllTEams", value)
                     jerseyList = lookupJerseys(key,value)
                 }
 
                 Log.d("Jersey List","$jerseyList")
-                Log.d("teamNamesInList","$teamsInfo")
+                Log.d("teamNamesInList", teamsInfo)
 
 
             }
@@ -164,7 +165,7 @@ Surface(
                 JerseyImage(jerseyURL) // Display club logo
 
                 Spacer(modifier = Modifier.width(8.dp)) // Add spacing between logo and name
-                Text(text = "Name: ${teamName} ${season}")
+                Text(text = "Name: $teamName $season")
             }
         }
 
@@ -189,13 +190,15 @@ suspend fun fetchAllLeagues(keyword : String): List<Leagues> {
 //    val encodedKeyword2 = URLEncoder.encode(keyword, "UTF-8")
 //    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=$encodedKeyword2"
 
-    val url_string =  "https://www.thesportsdb.com/api/v1/json/3/all_leagues.php"
+    val urlString =  "https://www.thesportsdb.com/api/v1/json/3/all_leagues.php"
 //    val url_string =  "https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=$keyword"
 
 
 //    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=Eliteserien"
-    val url = URL(url_string)
-    val con: HttpURLConnection = url.openConnection() as HttpURLConnection
+    val url = URL(urlString)
+    val con: HttpURLConnection = withContext(Dispatchers.IO) {
+        url.openConnection()
+    } as HttpURLConnection
 
 
     withContext(Dispatchers.IO) {
@@ -231,16 +234,20 @@ suspend fun fetchAllClubs(keyword : String,searchTerm:String): MutableMap<String
     val teamsList = mutableListOf<ClubEntity>()
     val teamMap = mutableMapOf<String,String>()
 
-    val encodedKeyword2 = URLEncoder.encode(keyword, "UTF-8")
-    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=$encodedKeyword2"
+    val encodedKeyword2 = withContext(Dispatchers.IO) {
+        URLEncoder.encode(keyword, "UTF-8")
+    }
+    val urlString = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=$encodedKeyword2"
 
 //    val url_string =  "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=English%20Premier%20League"
 //    val url_string =  "https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=$keyword"
 
 
 //    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=Eliteserien"
-    val url = URL(url_string)
-    val con: HttpURLConnection = url.openConnection() as HttpURLConnection
+    val url = URL(urlString)
+    val con: HttpURLConnection = withContext(Dispatchers.IO) {
+        url.openConnection()
+    } as HttpURLConnection
 
 
     withContext(Dispatchers.IO) {
@@ -262,8 +269,8 @@ suspend fun fetchAllClubs(keyword : String,searchTerm:String): MutableMap<String
                     val idTeam = leagueObject.getString("idTeam")
                     val teamName1 = leagueObject.getString("strTeam")
 
-                    if (teamName1.contains("$searchTerm")) {
-                        teamMap["$idTeam"] = "$teamName1"
+                    if (teamName1.contains(searchTerm)) {
+                        teamMap[idTeam] = teamName1
                     }
                 }
             } else {
@@ -297,7 +304,9 @@ suspend fun lookupJerseys(teamID : String, teamName: String) :MutableList<Triple
 
 //    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=Eliteserien"
     val url = URL(url_string)
-    val con: HttpURLConnection = url.openConnection() as HttpURLConnection
+    val con: HttpURLConnection = withContext(Dispatchers.IO) {
+        url.openConnection()
+    } as HttpURLConnection
 
 
 
@@ -322,7 +331,7 @@ suspend fun lookupJerseys(teamID : String, teamName: String) :MutableList<Triple
 
             val teamName = teamName
 
-            Log.d("Jersey Info ","$strEquipment")
+            Log.d("Jersey Info ", strEquipment)
             jerseysList.add(Triple(teamName, strSeason, strEquipment))
 
 
@@ -339,9 +348,10 @@ suspend fun lookupJerseys(teamID : String, teamName: String) :MutableList<Triple
 }
 
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun JerseyImage(jerseyUrl: String){
-    Log.d("JerseyImage","$jerseyUrl")
+    Log.d("JerseyImage", jerseyUrl)
 
     val painter = rememberImagePainter(
         data = jerseyUrl,
