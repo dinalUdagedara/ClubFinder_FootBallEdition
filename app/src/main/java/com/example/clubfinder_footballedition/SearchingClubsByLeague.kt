@@ -3,18 +3,13 @@ package com.example.clubfinder_footballedition
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -123,7 +118,7 @@ fun GUI(context: Context) {
                 contentColor = Color.White),
 
             onClick = {
-            addSeacrhedLeaguesToDB(context)
+            addSearchedLeaguesToDB(context)
         }) {
             Text("Save clubs to Database")
         }
@@ -155,6 +150,7 @@ suspend fun fetchLeagues(keyword : String): List<ClubEntity> {
     val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=$encodedKeyword"
 
 //    val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=Eliteserien"
+
     val url = URL(url_string)
     val con: HttpURLConnection = url.openConnection() as HttpURLConnection
 
@@ -198,7 +194,7 @@ suspend fun fetchLeagues(keyword : String): List<ClubEntity> {
 }
 
 
-fun addSeacrhedLeaguesToDB(context: Context){
+fun addSearchedLeaguesToDB(context: Context){
 
 
     val club1 = ClubEntity(

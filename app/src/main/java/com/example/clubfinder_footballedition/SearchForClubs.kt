@@ -13,6 +13,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.room.Room
 import coil.compose.rememberImagePainter
@@ -77,19 +78,10 @@ fun GUI_Club_Search(context:Context){
                 ClubDao.searchClubs(searchTerm)
             }
             allClubs = clubNames
-//            val clubs  = ClubDao.searchClubsTesting()
-//            withContext(Dispatchers.Main){
-//                allClubs = clubs
-//            }
+
         }
     }
-//    LaunchedEffect(Unit) {
-//        val clubs = withContext(Dispatchers.IO) {
-//            ClubDao.searchClubsTesting()
-//        }
-//        allClubs = clubs
-//
-//    }
+
 
 
 
@@ -113,11 +105,20 @@ fun GUI_Club_Search(context:Context){
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(modifier = Modifier.height(35.dp))
 
                 TextField(value = searchTerm, onValueChange = { searchTerm = it })
 
+                Spacer(modifier = Modifier.height(30.dp))
 
-                Button(onClick = {
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
+                        contentColor = Color.White),
+
+                    onClick = {
 
                     showClubInfo(searchTerm)
 
@@ -130,20 +131,30 @@ fun GUI_Club_Search(context:Context){
 
 
         }
+
         allClubs.forEach { club ->
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
             ) {
                 ClubLogo(club.strTeamLogo) // Display club logo
 
                 Spacer(modifier = Modifier.width(8.dp)) // Add spacing between logo and name
-                Text(text = "Name: ${club.teamName} ${club.idTeam}")
+                Text(text = club.teamName,
+                    modifier = Modifier
+                        .fillMaxSize(0.4f)
+                )
             }
         }
 
 
+
+
+
     }
 }
+
+
 
 
 

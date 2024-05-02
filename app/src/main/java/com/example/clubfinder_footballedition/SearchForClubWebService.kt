@@ -37,8 +37,7 @@ class SearchForClubWebService : ComponentActivity() {
             ClubFinder_FootBallEditionTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    modifier = Modifier.fillMaxSize()
                 ) {
 
                     SearchForClubWebServiceGUI()
@@ -70,8 +69,7 @@ fun SearchForClubWebServiceGUI(){
 
 
 Surface(
-    modifier = Modifier.fillMaxSize(),
-    color = Color(0xFF77B0AA)
+    modifier = Modifier.fillMaxSize()
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -80,7 +78,18 @@ Surface(
         ) {
         TextField(value = searchTerm, onValueChange = { searchTerm = it } )
 
-        Button(onClick = {
+        Spacer(modifier = Modifier.height(25.dp))
+
+        Button(
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .height(48.dp)
+            ,
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
+                contentColor = Color.White),
+
+
+            onClick = {
 
             //To Display fetched TeamInfo
 
@@ -93,8 +102,6 @@ Surface(
                         append("strLeague: ${league.strLeague}\n")
                         append("strSport: ${league.strSport}\n")
                         append("strLeagueAlternate: ${league.strLeagueAlternate}\n")
-
-
                     }
                 }
 
@@ -107,21 +114,10 @@ Surface(
                         fetchedAllTeams.putAll(allTeams)
                     }
 
-//                    val leagueTeamsInfo = allTeams.joinToString("\n\n") { team ->
-//                        buildString {
-//                            append("Team ID: ${team.idTeam}\n")
-//                            append("Team Name: ${team.teamName}\n")
-//                        }
-//
-//                    }
-//                    teamsInfo += leagueTeamsInfo + "\n\n" // Add teams info for the current league to the accumulated teamsInfo
 
                     allTeams.forEach { (key, value) ->
-                        teamsInfoStringBuilder.append("Team ID: $key\n")
                         teamsInfoStringBuilder.append("Team Name: $value\n\n")
-
                         Log.d("allTeams InFUn","$allTeams")
-
 
                     }
 
@@ -143,6 +139,8 @@ Surface(
 
             }
 
+                Log.d("Status","Finished")
+
 
         }) {
             Text("Fetch Teams")
@@ -155,12 +153,14 @@ Surface(
             modifier = Modifier.verticalScroll(rememberScrollState()),
             text = teamsInfo
         )
-        
+
+
 
         jerseysList.forEach { (teamName, season, jerseyURL) ->
             Log.d("list","$teamName,$season,$jerseyURL")
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
                 JerseyImage(jerseyURL) // Display club logo
 
@@ -169,7 +169,7 @@ Surface(
             }
         }
 
-        JerseyImage(jerseyUrl ="https://www.thesportsdb.com/images/media/team/jersey/igciz51598887447.png" )
+//        JerseyImage(jerseyUrl ="https://www.thesportsdb.com/images/media/team/jersey/igciz51598887447.png" )
 
 //        Text(
 //            modifier = Modifier.verticalScroll(rememberScrollState()),
