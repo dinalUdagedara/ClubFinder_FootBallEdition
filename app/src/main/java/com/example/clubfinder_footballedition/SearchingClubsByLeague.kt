@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,11 +49,10 @@ class SearchingClubsByLeague : ComponentActivity() {
 }
 
 
-
 @Composable
 fun GUI(context: Context) {
-    var teamInfoDisplay by remember { mutableStateOf(" ") }
-    var keyword by remember { mutableStateOf("") }
+    var teamInfoDisplay by rememberSaveable { mutableStateOf(" ") }
+    var keyword by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
     Column(
@@ -60,7 +60,16 @@ fun GUI(context: Context) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.padding(16.dp)) {
 
-        TextField(value = keyword, onValueChange = { keyword = it })
+        TextField(
+            value = keyword,
+            onValueChange = { keyword = it },
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color(0xFF135D66),
+                cursorColor = Color(0xFF135D66)
+            )
+            )
+
+
 
         Spacer(modifier = Modifier.height(25.dp))
 

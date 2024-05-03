@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -68,9 +69,9 @@ fun GUI_Club_Search(context:Context){
 // Access the DAO object
     val ClubDao = db.clubDao()
 
-    var searchTerm by remember { mutableStateOf("") }
+    var searchTerm by rememberSaveable { mutableStateOf("") }
 
-    var allClubs by remember { mutableStateOf<List<ClubEntity>>(emptyList()) }
+    var allClubs by rememberSaveable { mutableStateOf<List<ClubEntity>>(emptyList()) }
 
     fun showClubInfo(searchTerm:String){
         GlobalScope.launch  (Dispatchers.IO){
@@ -107,7 +108,12 @@ fun GUI_Club_Search(context:Context){
             ) {
                 Spacer(modifier = Modifier.height(35.dp))
 
-                TextField(value = searchTerm, onValueChange = { searchTerm = it })
+                TextField(value = searchTerm,
+                    onValueChange = { searchTerm = it },
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = Color(0xFF135D66),
+                        cursorColor = Color(0xFF135D66)
+                    ))
 
                 Spacer(modifier = Modifier.height(30.dp))
 

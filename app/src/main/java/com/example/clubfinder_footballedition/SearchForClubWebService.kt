@@ -1,6 +1,7 @@
 package com.example.clubfinder_footballedition
 
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,7 +33,7 @@ import java.net.URLEncoder
 val leagueList = mutableListOf<Leagues>()
 class SearchForClubWebService : ComponentActivity() {
 
-
+private var searchTerm = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -45,6 +47,16 @@ class SearchForClubWebService : ComponentActivity() {
                 }
             }
         }
+
+        savedInstanceState?.let{bundle ->
+            searchTerm = bundle.getString("searchTerm","")
+        }
+
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("searchTerm",searchTerm)
     }
 
 }
@@ -56,23 +68,23 @@ fun SearchForClubWebServiceGUI(){
 
     val fetchedAllTeams = mutableMapOf<String,String>()
 
-    var leagueInfo by remember { mutableStateOf(" ") }
-    var teamsInfo by remember { mutableStateOf("") }
+    var leagueInfo by rememberSaveable { mutableStateOf(" ") }
+    var teamsInfo by rememberSaveable { mutableStateOf("") }
 
-    var searchTerm by remember { mutableStateOf("") }
-    val keyword by remember { mutableStateOf("") }
+    var searchTerm by rememberSaveable { mutableStateOf("") }
 
+    val keyword by rememberSaveable { mutableStateOf("") }
     // Creates a CoroutineScope bound to the GUI composable lifecycle
     val scope = rememberCoroutineScope()
 
     var allTeams: MutableMap<String, String>
     var jerseyList = mutableListOf<Triple<String, String, String>>()
 
-    var showJerseys by remember { mutableStateOf(false) }
-    var showTeamInfo by remember { mutableStateOf(false) }
+    var showJerseys by rememberSaveable { mutableStateOf(false) }
+    var showTeamInfo by rememberSaveable { mutableStateOf(false) }
 
-    var finishedFetching by remember { mutableStateOf(false) }
-    var loading by remember { mutableStateOf(false) }
+    var finishedFetching by rememberSaveable { mutableStateOf(false) }
+    var loading by rememberSaveable { mutableStateOf(false) }
 
 Surface(
     modifier = Modifier.fillMaxSize()
@@ -85,7 +97,13 @@ Surface(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            TextField(value = searchTerm, onValueChange = { searchTerm = it } )
+            TextField(value = searchTerm, onValueChange = { searchTerm = it },
+                colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color(0xFF135D66),
+                    cursorColor = Color(0xFF135D66)
+                )
+
+            )
 
             Spacer(modifier = Modifier.height(25.dp))
 
@@ -164,10 +182,10 @@ Surface(
             }
 
             if (loading) {
-                CircularProgressIndicator(modifier = Modifier.size(50.dp))
-            } else {
-                // Your other UI components
-                // Button, TextField, etc.
+                CircularProgressIndicator(
+                    modifier = Modifier.size(50.dp),
+                    color = Color(0xFF135D66) // Change the color here
+                )
             }
 
 
@@ -228,143 +246,6 @@ Surface(
             }
         }
     }
-//    Column(
-//        modifier = Modifier.verticalScroll(rememberScrollState()),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.Center,
-//
-//
-//        ) {
-//        TextField(value = searchTerm, onValueChange = { searchTerm = it } )
-//
-//        Spacer(modifier = Modifier.height(25.dp))
-//
-//        Button(
-//            modifier = Modifier
-//                .fillMaxWidth(0.5f)
-//                .height(48.dp)
-//            ,
-//            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
-//                contentColor = Color.White),
-//
-//
-//            onClick = {
-//
-//                showJerseys = false
-//                showTeamInfo = true
-//
-//            //To Display fetched TeamInfo
-//
-//            scope.launch {
-//
-//                val allLeagues = fetchAllLeagues(keyword)
-//                leagueInfo = allLeagues.joinToString("\n\n") { league ->
-//                    buildString {
-//                        append("idLeague: ${league.idLeague}\n")
-//                        append("strLeague: ${league.strLeague}\n")
-//                        append("strSport: ${league.strSport}\n")
-//                        append("strLeagueAlternate: ${league.strLeagueAlternate}\n")
-//                    }
-//                }
-//
-//
-//                val teamsInfoStringBuilder = StringBuilder()
-//                leagueList.forEach{league ->
-//
-//                    allTeams = fetchAllClubs(league.strLeague,searchTerm)
-//                    if (allTeams != null){
-//                        fetchedAllTeams.putAll(allTeams)
-//                    }
-//
-//
-//                    allTeams.forEach { (key, value) ->
-//                        teamsInfoStringBuilder.append("Team Name: $value\n\n")
-//                        Log.d("allTeams InFUn","$allTeams")
-//
-//                    }
-//
-//                    val teamsInfoString = teamsInfoStringBuilder.toString()
-//                    teamsInfo = teamsInfoString
-//
-//                    Log.d("allTeams fetched","$fetchedAllTeams")
-//
-//                }
-//
-//                fetchedAllTeams.forEach{ (key,value)->
-//                    Log.d("FetchedAllTEams", value)
-//                    jerseyList = lookupJerseys(key,value)
-//                }
-//
-//                Log.d("Jersey List","$jerseyList")
-//                Log.d("teamNamesInList", teamsInfo)
-//
-//
-//            }
-//
-//
-//                Log.d("Status","Finished")
-//
-//
-//        }) {
-//            Text("Fetch Teams")
-//        }
-//
-//
-//
-//        Button(onClick = {
-//            showJerseys = true
-//            showTeamInfo = false
-//
-//            scope.launch {
-//                fetchedAllTeams.forEach{ (key,value)->
-//                    Log.d("FetchedAllTEams", value)
-//                    jerseyList = lookupJerseys(key,value)
-//                }
-//
-//
-//
-//                Log.d("Jersey List","$jerseyList")
-//                Log.d("teamNamesInList", teamsInfo)
-//            }
-//
-//        }) {
-//            Text(text = "Fetch Jerseys")
-//        }
-//        if (showTeamInfo){
-//
-//        }
-//
-//        Text(
-//            modifier = Modifier.verticalScroll(rememberScrollState()),
-//            text = teamsInfo
-//        )
-//
-//
-//        if (showJerseys){
-//
-//            jerseysList.forEach { (teamName, season, jerseyURL) ->
-//                Log.d("list","$teamName,$season,$jerseyURL")
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically,
-//                    modifier = Modifier.verticalScroll(rememberScrollState())
-//                ) {
-//                    JerseyImage(jerseyURL) // Display club logo
-//
-//                    Spacer(modifier = Modifier.width(8.dp)) // Add spacing between logo and name
-//                    Text(text = "Name: $teamName $season")
-//                }
-//            }
-//        }
-//
-////        JerseyImage(jerseyUrl ="https://www.thesportsdb.com/images/media/team/jersey/igciz51598887447.png" )
-//
-////        Text(
-////            modifier = Modifier.verticalScroll(rememberScrollState()),
-////            text = leagueInfo
-////        )
-//
-//
-//    }
 }
 
 }

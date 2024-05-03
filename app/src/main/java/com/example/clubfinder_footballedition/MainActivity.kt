@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,8 +35,18 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    MainButtons(context1 = applicationContext,context2 = this@MainActivity)
+//                    MainButtons(context1 = applicationContext,context2 = this@MainActivity)
 
+                    var showLandingPage by remember { mutableStateOf(true) }
+
+                    if (showLandingPage) {
+                        LandingPage {
+                            showLandingPage = false
+                        }
+                    }
+                    else{
+                        MainButtons(context1 = applicationContext,context2 = this@MainActivity)
+                    }
                 }
             }
         }
@@ -204,3 +216,59 @@ fun addLeaguesToDB(context:Context){
 }
 
 
+@Composable
+fun LandingPage(onStartClicked: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Image
+        CoverImage(
+            painter = painterResource(id = R.drawable.landingimagebest3),
+
+            contentDescription = "Cover Image",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(900.dp)
+        )
+
+        // Buttons
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp), // Adjust padding as needed
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally,
+
+        ) {
+
+
+            Button(
+                onClick = onStartClicked,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color(0xFF135D66),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(text = "Get Started")
+            }
+        }
+    }
+}
+
+
+@Composable
+fun CoverImage(
+    painter: Painter,
+    contentDescription: String?,
+    modifier: Modifier = Modifier
+) {
+    Image(
+        painter = painter,
+        contentDescription = contentDescription,
+        modifier = modifier,
+        contentScale = ContentScale.Crop
+    )
+}
