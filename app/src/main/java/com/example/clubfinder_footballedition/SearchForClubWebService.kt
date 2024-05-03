@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -67,117 +68,303 @@ fun SearchForClubWebServiceGUI(){
     var allTeams: MutableMap<String, String>
     var jerseyList = mutableListOf<Triple<String, String, String>>()
 
+    var showJerseys by remember { mutableStateOf(false) }
+    var showTeamInfo by remember { mutableStateOf(false) }
+
+    var finishedFetching by remember { mutableStateOf(false) }
+    var loading by remember { mutableStateOf(false) }
 
 Surface(
     modifier = Modifier.fillMaxSize()
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
 
-        ) {
-        TextField(value = searchTerm, onValueChange = { searchTerm = it } )
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item {
+            TextField(value = searchTerm, onValueChange = { searchTerm = it } )
 
-        Spacer(modifier = Modifier.height(25.dp))
+            Spacer(modifier = Modifier.height(25.dp))
 
-        Button(
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .height(48.dp)
-            ,
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
-                contentColor = Color.White),
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .height(48.dp)
+                ,
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
+                    contentColor = Color.White),
+
+                enabled = !finishedFetching,
+                onClick = {
+                    finishedFetching = true
+
+                    showJerseys = false
+                    showTeamInfo = true
+
+                    //To Display fetched TeamInfo
+
+                    loading = true
+                    scope.launch {
+
+                        val allLeagues = fetchAllLeagues(keyword)
+                        leagueInfo = allLeagues.joinToString("\n\n") { league ->
+                            buildString {
+                                append("idLeague: ${league.idLeague}\n")
+                                append("strLeague: ${league.strLeague}\n")
+                                append("strSport: ${league.strSport}\n")
+                                append("strLeagueAlternate: ${league.strLeagueAlternate}\n")
+                            }
+                        }
 
 
-            onClick = {
+                        val teamsInfoStringBuilder = StringBuilder()
+                        leagueList.forEach{league ->
 
-            //To Display fetched TeamInfo
+                            allTeams = fetchAllClubs(league.strLeague,searchTerm)
+                            if (allTeams != null){
+                                fetchedAllTeams.putAll(allTeams)
+                            }
 
-            scope.launch {
 
-                val allLeagues = fetchAllLeagues(keyword)
-                leagueInfo = allLeagues.joinToString("\n\n") { league ->
-                    buildString {
-                        append("idLeague: ${league.idLeague}\n")
-                        append("strLeague: ${league.strLeague}\n")
-                        append("strSport: ${league.strSport}\n")
-                        append("strLeagueAlternate: ${league.strLeagueAlternate}\n")
+                            allTeams.forEach { (key, value) ->
+                                teamsInfoStringBuilder.append("Team Name: $value\n\n")
+                                Log.d("allTeams InFUn","$allTeams")
+
+                            }
+
+                            val teamsInfoString = teamsInfoStringBuilder.toString()
+                            teamsInfo = teamsInfoString
+
+                            Log.d("allTeams fetched","$fetchedAllTeams")
+
+                        }
+
+                        fetchedAllTeams.forEach{ (key,value)->
+                            Log.d("FetchedAllTEams", value)
+                            jerseyList = lookupJerseys(key,value)
+                        }
+
+                        Log.d("Jersey List","$jerseyList")
+                        Log.d("teamNamesInList", teamsInfo)
+
+                        loading = false
                     }
+
+
+
+
+                    Log.d("Status","Finished")
+
+
+                }) {
+                Text("Fetch Teams")
+            }
+
+            if (loading) {
+                CircularProgressIndicator(modifier = Modifier.size(50.dp))
+            } else {
+                // Your other UI components
+                // Button, TextField, etc.
+            }
+
+
+            Spacer(modifier = Modifier.height(5.dp))
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(0.65f)
+                    .height(48.dp)
+                ,
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
+                    contentColor = Color.White),
+
+                enabled = finishedFetching,
+                onClick = {
+                    finishedFetching = false
+                    showJerseys = true
+                    showTeamInfo = false
+
+                scope.launch {
+                    fetchedAllTeams.forEach{ (key,value)->
+                        Log.d("FetchedAllTEams", value)
+                        jerseyList = lookupJerseys(key,value)
+                    }
+
+
+
+                    Log.d("Jersey List","$jerseyList")
+                    Log.d("teamNamesInList", teamsInfo)
                 }
 
-
-                val teamsInfoStringBuilder = StringBuilder()
-                leagueList.forEach{league ->
-
-                    allTeams = fetchAllClubs(league.strLeague,searchTerm)
-                    if (allTeams != null){
-                        fetchedAllTeams.putAll(allTeams)
-                    }
-
-
-                    allTeams.forEach { (key, value) ->
-                        teamsInfoStringBuilder.append("Team Name: $value\n\n")
-                        Log.d("allTeams InFUn","$allTeams")
-
-                    }
-
-                    val teamsInfoString = teamsInfoStringBuilder.toString()
-                    teamsInfo = teamsInfoString
-
-                    Log.d("allTeams fetched","$fetchedAllTeams")
-
-                }
-
-                fetchedAllTeams.forEach{ (key,value)->
-                    Log.d("FetchedAllTEams", value)
-                    jerseyList = lookupJerseys(key,value)
-                }
-
-                Log.d("Jersey List","$jerseyList")
-                Log.d("teamNamesInList", teamsInfo)
-
+            }) {
+                Text(text = "Fetch Jerseys")
+            }
+            if (showTeamInfo){
 
             }
 
-                Log.d("Status","Finished")
+            Text(
+//                modifier = Modifier.verticalScroll(rememberScrollState()),
+                text = teamsInfo
+            )
 
 
-        }) {
-            Text("Fetch Teams")
-        }
+            if (showJerseys){
 
+                jerseysList.forEach { (teamName, season, jerseyURL) ->
+                    Log.d("list","$teamName,$season,$jerseyURL")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+//                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    ) {
+                        JerseyImage(jerseyURL) // Display club logo
 
-
-
-        Text(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            text = teamsInfo
-        )
-
-
-
-        jerseysList.forEach { (teamName, season, jerseyURL) ->
-            Log.d("list","$teamName,$season,$jerseyURL")
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.verticalScroll(rememberScrollState())
-            ) {
-                JerseyImage(jerseyURL) // Display club logo
-
-                Spacer(modifier = Modifier.width(8.dp)) // Add spacing between logo and name
-                Text(text = "Name: $teamName $season")
+                        Spacer(modifier = Modifier.width(8.dp)) // Add spacing between logo and name
+                        Text(text = "Name: $teamName $season")
+                    }
+                }
             }
         }
-
-//        JerseyImage(jerseyUrl ="https://www.thesportsdb.com/images/media/team/jersey/igciz51598887447.png" )
-
+    }
+//    Column(
+//        modifier = Modifier.verticalScroll(rememberScrollState()),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = Arrangement.Center,
+//
+//
+//        ) {
+//        TextField(value = searchTerm, onValueChange = { searchTerm = it } )
+//
+//        Spacer(modifier = Modifier.height(25.dp))
+//
+//        Button(
+//            modifier = Modifier
+//                .fillMaxWidth(0.5f)
+//                .height(48.dp)
+//            ,
+//            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF135D66),
+//                contentColor = Color.White),
+//
+//
+//            onClick = {
+//
+//                showJerseys = false
+//                showTeamInfo = true
+//
+//            //To Display fetched TeamInfo
+//
+//            scope.launch {
+//
+//                val allLeagues = fetchAllLeagues(keyword)
+//                leagueInfo = allLeagues.joinToString("\n\n") { league ->
+//                    buildString {
+//                        append("idLeague: ${league.idLeague}\n")
+//                        append("strLeague: ${league.strLeague}\n")
+//                        append("strSport: ${league.strSport}\n")
+//                        append("strLeagueAlternate: ${league.strLeagueAlternate}\n")
+//                    }
+//                }
+//
+//
+//                val teamsInfoStringBuilder = StringBuilder()
+//                leagueList.forEach{league ->
+//
+//                    allTeams = fetchAllClubs(league.strLeague,searchTerm)
+//                    if (allTeams != null){
+//                        fetchedAllTeams.putAll(allTeams)
+//                    }
+//
+//
+//                    allTeams.forEach { (key, value) ->
+//                        teamsInfoStringBuilder.append("Team Name: $value\n\n")
+//                        Log.d("allTeams InFUn","$allTeams")
+//
+//                    }
+//
+//                    val teamsInfoString = teamsInfoStringBuilder.toString()
+//                    teamsInfo = teamsInfoString
+//
+//                    Log.d("allTeams fetched","$fetchedAllTeams")
+//
+//                }
+//
+//                fetchedAllTeams.forEach{ (key,value)->
+//                    Log.d("FetchedAllTEams", value)
+//                    jerseyList = lookupJerseys(key,value)
+//                }
+//
+//                Log.d("Jersey List","$jerseyList")
+//                Log.d("teamNamesInList", teamsInfo)
+//
+//
+//            }
+//
+//
+//                Log.d("Status","Finished")
+//
+//
+//        }) {
+//            Text("Fetch Teams")
+//        }
+//
+//
+//
+//        Button(onClick = {
+//            showJerseys = true
+//            showTeamInfo = false
+//
+//            scope.launch {
+//                fetchedAllTeams.forEach{ (key,value)->
+//                    Log.d("FetchedAllTEams", value)
+//                    jerseyList = lookupJerseys(key,value)
+//                }
+//
+//
+//
+//                Log.d("Jersey List","$jerseyList")
+//                Log.d("teamNamesInList", teamsInfo)
+//            }
+//
+//        }) {
+//            Text(text = "Fetch Jerseys")
+//        }
+//        if (showTeamInfo){
+//
+//        }
+//
 //        Text(
 //            modifier = Modifier.verticalScroll(rememberScrollState()),
-//            text = leagueInfo
+//            text = teamsInfo
 //        )
-
-
-    }
+//
+//
+//        if (showJerseys){
+//
+//            jerseysList.forEach { (teamName, season, jerseyURL) ->
+//                Log.d("list","$teamName,$season,$jerseyURL")
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    modifier = Modifier.verticalScroll(rememberScrollState())
+//                ) {
+//                    JerseyImage(jerseyURL) // Display club logo
+//
+//                    Spacer(modifier = Modifier.width(8.dp)) // Add spacing between logo and name
+//                    Text(text = "Name: $teamName $season")
+//                }
+//            }
+//        }
+//
+////        JerseyImage(jerseyUrl ="https://www.thesportsdb.com/images/media/team/jersey/igciz51598887447.png" )
+//
+////        Text(
+////            modifier = Modifier.verticalScroll(rememberScrollState()),
+////            text = leagueInfo
+////        )
+//
+//
+//    }
 }
 
 }
@@ -333,8 +520,6 @@ suspend fun lookupJerseys(teamID : String, teamName: String) :MutableList<Triple
 
             Log.d("Jersey Info ", strEquipment)
             jerseysList.add(Triple(teamName, strSeason, strEquipment))
-
-
 
 
         }
