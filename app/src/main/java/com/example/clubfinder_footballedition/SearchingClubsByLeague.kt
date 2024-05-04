@@ -227,26 +227,7 @@ fun showErrorToast(context: Context, errorMessage: String) {
 
 
 fun addSearchedLeaguesToDB(context: Context){
-
-
-    val club1 = ClubEntity(
-        idTeam = "1345",
-        teamName = "arsenal",
-        strTeamShort = "shortName",
-        strAlternate = "alternateName",
-        intFormedYear = "1997",
-        strLeague ="legue1",
-        idLeague = "123",
-        strStadium = "Mahinda Rajapaksha",
-        strKeywords = "keyword",
-        strStadiumThumb = "thumb",
-        strStadiumLocation = "location",
-        intStadiumCapacity = "capacity",
-        strWebsite = "website",
-        strTeamJersey = "jersey",
-        strTeamLogo = "Logo" )
-
-
+    
 
     GlobalScope.launch (Dispatchers.IO){
         val db = Room.databaseBuilder(

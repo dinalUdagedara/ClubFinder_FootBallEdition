@@ -423,7 +423,7 @@ fun JerseyImage(jerseyUrl: String){
     val painter = rememberImagePainter(
         data = jerseyUrl,
         builder = {
-            // You can configure image loading options here
+
         }
     )
     Image(

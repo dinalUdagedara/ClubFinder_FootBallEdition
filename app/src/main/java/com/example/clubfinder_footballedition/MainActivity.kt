@@ -25,6 +25,8 @@ import androidx.room.Room
 import com.example.clubfinder_footballedition.ui.theme.ClubFinder_FootBallEditionTheme
 import kotlinx.coroutines.*
 
+//link to the Demo Video - https://youtu.be/eS5lG_mOkAE
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
