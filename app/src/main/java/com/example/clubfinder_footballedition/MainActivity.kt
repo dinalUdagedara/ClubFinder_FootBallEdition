@@ -224,11 +224,12 @@ fun LandingPage(onStartClicked: () -> Unit) {
         // Image
         CoverImage(
             painter = painterResource(id = R.drawable.landingimagebest3),
+   //         painter = painterResource(id = R.drawable.coverimage),
 
             contentDescription = "Cover Image",
             modifier = Modifier
                 .fillMaxWidth()
-                .height(900.dp)
+                .fillMaxHeight(1f)
         )
 
         // Buttons
@@ -263,7 +264,7 @@ fun LandingPage(onStartClicked: () -> Unit) {
 fun CoverImage(
     painter: Painter,
     contentDescription: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Image(
         painter = painter,
@@ -272,3 +273,5 @@ fun CoverImage(
         contentScale = ContentScale.Crop
     )
 }
+
+

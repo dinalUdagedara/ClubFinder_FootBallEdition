@@ -3,6 +3,7 @@ package com.example.clubfinder_footballedition
 
 import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -51,6 +52,7 @@ class SearchingClubsByLeague : ComponentActivity() {
 
 @Composable
 fun GUI(context: Context) {
+    var isClubsFetched by rememberSaveable { mutableStateOf(false) }
     var teamInfoDisplay by rememberSaveable { mutableStateOf(" ") }
     var keyword by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -89,8 +91,9 @@ fun GUI(context: Context) {
 
 
                     onClick = {
+                        isClubsFetched = true
                 scope.launch {
-                    val teams = fetchLeagues(keyword)
+                    val teams = fetchLeagues(context,keyword)
                     teamInfoDisplay = teams.joinToString("\n\n") { team ->
                         buildString {
                             append("Team ID: ${team.idTeam}\n")
@@ -110,8 +113,10 @@ fun GUI(context: Context) {
                             append("strTeamLogo: ${team.strTeamLogo}\n")
                         }
                     }
+
                 }
-            }) {
+            }
+                ) {
                 Text("Fetch Teams")
             }
             Spacer(modifier = Modifier.height(35.dp))
@@ -127,8 +132,11 @@ fun GUI(context: Context) {
                 contentColor = Color.White),
 
             onClick = {
+                isClubsFetched = false
             addSearchedLeaguesToDB(context)
-        }) {
+        },
+            enabled = isClubsFetched
+        ) {
             Text("Save clubs to Database")
         }
         Spacer(modifier = Modifier.height(15.dp))
@@ -154,7 +162,8 @@ fun GUI(context: Context) {
 }
 
 val teamsList = mutableListOf<ClubEntity>()
-suspend fun fetchLeagues(keyword : String): List<ClubEntity> {
+suspend fun fetchLeagues(context:Context,keyword : String): List<ClubEntity> {
+
     val encodedKeyword = URLEncoder.encode(keyword, "UTF-8")
     val url_string = "https://www.thesportsdb.com/api/v1/json/3/search_all_teams.php?l=$encodedKeyword"
 
@@ -165,41 +174,55 @@ suspend fun fetchLeagues(keyword : String): List<ClubEntity> {
 
 
     withContext(Dispatchers.IO) {
-        val bf = BufferedReader(InputStreamReader(con.inputStream))
-        val stb = StringBuilder()
-        var line: String? = bf.readLine()
-        while (line != null) {
-            stb.append(line + "\n")
-            line = bf.readLine()
-        }
+        try {
+            val bf = BufferedReader(InputStreamReader(con.inputStream))
+            val stb = StringBuilder()
+            var line: String? = bf.readLine()
+            while (line != null) {
+                stb.append(line + "\n")
+                line = bf.readLine()
+            }
 
-        val json = JSONObject(stb.toString())
-        val jsonArray = json.getJSONArray("teams")
+            val json = JSONObject(stb.toString())
+            val jsonArray = json.getJSONArray("teams")
 
-        for (i in 0 until jsonArray.length()) {
-            val leagueObject = jsonArray.getJSONObject(i)
-            val team = ClubEntity(
-                idTeam = leagueObject.getString("idTeam"),
-                teamName = leagueObject.getString("strTeam"),
-                strTeamShort = leagueObject.getString("strTeamShort"),
-                strAlternate = leagueObject.getString("strAlternate"),
-                intFormedYear = leagueObject.getString("intFormedYear"),
-                strLeague = leagueObject.getString("strLeague"),
-                idLeague = leagueObject.getString("idLeague"),
-                strStadium = leagueObject.getString("strStadium"),
-                strKeywords = leagueObject.getString("strKeywords"),
-                strStadiumThumb = leagueObject.getString("strStadiumThumb"),
-                strStadiumLocation = leagueObject.getString("strStadiumLocation"),
-                intStadiumCapacity = leagueObject.getString("strLeague"),
-                strWebsite = leagueObject.getString("strWebsite"),
-                strTeamJersey = leagueObject.getString("strTeamJersey"),
-                strTeamLogo = leagueObject.getString("strTeamLogo")
-            )
-            teamsList.add(team)
+            for (i in 0 until jsonArray.length()) {
+                val leagueObject = jsonArray.getJSONObject(i)
+                val team = ClubEntity(
+                    idTeam = leagueObject.getString("idTeam"),
+                    teamName = leagueObject.getString("strTeam"),
+                    strTeamShort = leagueObject.getString("strTeamShort"),
+                    strAlternate = leagueObject.getString("strAlternate"),
+                    intFormedYear = leagueObject.getString("intFormedYear"),
+                    strLeague = leagueObject.getString("strLeague"),
+                    idLeague = leagueObject.getString("idLeague"),
+                    strStadium = leagueObject.getString("strStadium"),
+                    strKeywords = leagueObject.getString("strKeywords"),
+                    strStadiumThumb = leagueObject.getString("strStadiumThumb"),
+                    strStadiumLocation = leagueObject.getString("strStadiumLocation"),
+                    intStadiumCapacity = leagueObject.getString("strLeague"),
+                    strWebsite = leagueObject.getString("strWebsite"),
+                    strTeamJersey = leagueObject.getString("strTeamJersey"),
+                    strTeamLogo = leagueObject.getString("strTeamLogo")
+                )
+                teamsList.add(team)
+            }
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+            showErrorToast(context,"Entered League is Invalid")
+            // You might want to inform the user or take corrective actions based on the type of error
         }
     }
+    // Function to show an error toast message
+
 
     return teamsList
+}
+fun showErrorToast(context: Context, errorMessage: String) {
+    GlobalScope.launch(Dispatchers.Main) {
+        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+    }
 }
 
 
@@ -237,7 +260,9 @@ fun addSearchedLeaguesToDB(context: Context){
             ClubDao.insertAll(team)
         }
 
-
+        withContext(Dispatchers.Main) {
+            Toast.makeText(context, "Clubs added to the Database", Toast.LENGTH_SHORT).show()
+        }
     }
 
 }

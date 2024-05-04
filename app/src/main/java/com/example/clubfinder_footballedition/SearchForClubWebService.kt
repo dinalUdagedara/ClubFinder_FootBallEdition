@@ -117,7 +117,7 @@ Surface(
 
                 enabled = !finishedFetching,
                 onClick = {
-                    finishedFetching = true
+
 
                     showJerseys = false
                     showTeamInfo = true
@@ -169,6 +169,7 @@ Surface(
                         Log.d("teamNamesInList", teamsInfo)
 
                         loading = false
+                        finishedFetching = true
                     }
 
 
