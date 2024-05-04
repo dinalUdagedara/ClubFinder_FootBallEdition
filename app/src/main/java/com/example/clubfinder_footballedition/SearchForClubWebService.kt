@@ -38,7 +38,7 @@ private var searchTerm = ""
         super.onCreate(savedInstanceState)
         setContent {
             ClubFinder_FootBallEditionTheme {
-                // A surface container using the 'background' color from the theme
+
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -185,7 +185,7 @@ Surface(
             if (loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(50.dp),
-                    color = Color(0xFF135D66) // Change the color here
+                    color = Color(0xFF135D66)
                 )
             }
 
@@ -428,7 +428,7 @@ fun JerseyImage(jerseyUrl: String){
     )
     Image(
         painter = painter,
-        contentDescription = null, // Provide appropriate content description
-        modifier = Modifier.size(50.dp) // Adjust size as needed
+        contentDescription = null,
+        modifier = Modifier.size(50.dp) 
     )
 }

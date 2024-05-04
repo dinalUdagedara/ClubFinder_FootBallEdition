@@ -227,7 +227,7 @@ fun showErrorToast(context: Context, errorMessage: String) {
 
 
 fun addSearchedLeaguesToDB(context: Context){
-    
+
 
     GlobalScope.launch (Dispatchers.IO){
         val db = Room.databaseBuilder(
